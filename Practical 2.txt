@@ -1,0 +1,41 @@
+DECLARE
+    v_roll_no NUMBER;
+    v_book_name VARCHAR2(50);
+    v_issue_date DATE;
+    v_days NUMBER;
+    v_fine_amt NUMBER := 0;
+    no_record EXCEPTION;
+BEGIN
+    v_roll_no := &roll_no;
+    v_book_name := '&book_name';
+    
+    SELECT DateofIssue INTO v_issue_date 
+    FROM Borrower 
+    WHERE Rollin = v_roll_no AND NameofBook = v_book_name AND Status = 'I';
+    
+    v_days := SYSDATE - v_issue_date;
+    
+    IF v_days > 30 THEN
+        v_fine_amt := (v_days - 30) * 50 + (30 - 15) * 5;
+    ELSIF v_days >= 15 THEN
+        v_fine_amt := (v_days - 15) * 5;
+    END IF;
+    
+    UPDATE Borrower 
+    SET Status = 'R' 
+    WHERE Rollin = v_roll_no AND NameofBook = v_book_name;
+    
+    IF v_fine_amt > 0 THEN
+        INSERT INTO Fine VALUES(v_roll_no, SYSDATE, v_fine_amt);
+    END IF;
+    
+    COMMIT;
+    DBMS_OUTPUT.PUT_LINE('Book returned. Fine: Rs.' || v_fine_amt);
+    
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('No such book issued to this roll number');
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
+END;
+/

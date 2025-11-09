@@ -1,0 +1,50 @@
+CREATE TABLE Customer (
+    C_id INT PRIMARY KEY,
+    cname VARCHAR(50),
+    city VARCHAR(50)
+);
+
+CREATE TABLE Account (
+    Acc_no INT PRIMARY KEY,
+    C_id INT,
+    Acc_Type VARCHAR(20),
+    amount DECIMAL(10,2),
+    FOREIGN KEY (C_id) REFERENCES Customer(C_id)
+);
+
+1.)SELECT c.cname, a.Acc_Type, a.amount 
+FROM Customer c 
+INNER JOIN Account a ON c.C_id = a.C_id 
+WHERE a.Acc_Type = 'Saving';
+
+
+2)-- Natural Join
+SELECT * FROM Customer NATURAL JOIN Account;
+
+-- Left Join
+SELECT * FROM Customer c LEFT JOIN Account a ON c.C_id = a.C_id;
+
+-- Right Join
+SELECT * FROM Customer c RIGHT JOIN Account a ON c.C_id = a.C_id;
+
+3)SELECT * FROM Customer 
+WHERE city = (SELECT city FROM Customer WHERE cname = 'pooja');
+
+4)SELECT * FROM Account 
+WHERE amount < (SELECT AVG(amount) FROM Account);
+
+5)SELECT C_id FROM Account 
+WHERE amount = (SELECT MAX(amount) FROM Account);
+
+6)SELECT a1.amount, a1.Acc_Type 
+FROM Account a1 
+WHERE a1.amount = (
+    SELECT MIN(a2.amount) 
+    FROM Account a2 
+    WHERE a1.Acc_Type = a2.Acc_Type
+);
+
+7)SELECT amount FROM Account 
+WHERE amount > ANY (
+    SELECT amount FROM Account WHERE Acc_Type = 'Saving'
+);

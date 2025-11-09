@@ -1,0 +1,13 @@
+1) SELECT DISTINCT i.name, t.semester, t.year 
+FROM instructor i 
+INNER JOIN teaches t ON i.T_ID = t.T_ID 
+ORDER BY i.name, t.year, t.semester;
+
+2) CREATE VIEW student_view AS 
+SELECT * FROM student;
+
+3)ALTER TABLE student 
+CHANGE dept_name department_name VARCHAR(50);
+
+4)ALTER TABLE student 
+CHANGE dept_name department_name VARCHAR(50);

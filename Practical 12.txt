@@ -1,0 +1,27 @@
+CREATE OR REPLACE TRIGGER trg_Library_After
+AFTER UPDATE OR DELETE ON Library
+FOR EACH ROW
+BEGIN
+    IF UPDATING THEN
+        INSERT INTO LibraryAudit VALUES(
+            :OLD.BookID, 
+            :OLD.BookName, 
+            :OLD.Author, 
+            :OLD.Publisher, 
+            :OLD.Quantity,
+            SYSDATE,
+            'UPDATE'
+        );
+    ELSIF DELETING THEN
+        INSERT INTO LibraryAudit VALUES(
+            :OLD.BookID, 
+            :OLD.BookName, 
+            :OLD.Author, 
+            :OLD.Publisher, 
+            :OLD.Quantity,
+            SYSDATE,
+            'DELETE'
+        );
+    END IF;
+END;
+/

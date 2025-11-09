@@ -1,0 +1,25 @@
+SELECT dept_name, AVG(salary) as avg_salary 
+FROM instructor 
+GROUP BY dept_name 
+HAVING AVG(salary) > 42000;
+
+1)SELECT dept_name, AVG(salary) as avg_salary 
+FROM instructor 
+GROUP BY dept_name 
+HAVING AVG(salary) > 42000;
+
+2)UPDATE instructor 
+SET salary = salary * 1.10 
+WHERE dept_name = 'Computer';
+
+3)SELECT name FROM instructor 
+WHERE name NOT IN ('Amol', 'Amit');
+
+4)SELECT name FROM student 
+WHERE name LIKE '%am%';
+
+5)SELECT DISTINCT s.name 
+FROM student s 
+INNER JOIN takes t ON s.S_ID = t.S_ID 
+INNER JOIN course c ON t.course_id = c.course_id 
+WHERE s.dept_name = 'Computer' AND c.title = 'DBMS';

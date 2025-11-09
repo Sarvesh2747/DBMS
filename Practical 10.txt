@@ -1,0 +1,48 @@
+import com.mongodb.MongoClient;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.MongoCollection;
+import org.bson.Document;
+import com.mongodb.client.FindIterable;
+import java.util.Iterator;
+
+public class InstituteDB {
+    public static void main(String[] args) {
+        // 1. Create Database & Connect
+        MongoClient mongo = new MongoClient("localhost", 27017);
+        MongoDatabase database = mongo.getDatabase("Institute");
+        System.out.println("Database created/connected");
+        
+        // 2. Create Collection
+        database.createCollection("Students");
+        MongoCollection<Document> collection = database.getCollection("Students");
+        System.out.println("Collection created");
+        
+        // 3. Insert Document
+        Document doc = new Document("name", "John")
+                      .append("roll", 101)
+                      .append("branch", "Computer")
+                      .append("marks", 85);
+        collection.insertOne(doc);
+        System.out.println("Document inserted");
+        
+        // 4. Display Data
+        FindIterable<Document> iterDoc = collection.find();
+        Iterator<Document> it = iterDoc.iterator();
+        while(it.hasNext()) {
+            System.out.println(it.next());
+        }
+        
+        // 5. Remove Document
+        collection.deleteOne(new Document("roll", 101));
+        System.out.println("Document deleted");
+        
+        // 6. Update Document
+        collection.updateOne(
+            new Document("name", "John"),
+            new Document("$set", new Document("marks", 90))
+        );
+        System.out.println("Document updated");
+        
+        mongo.close();
+    }
+}

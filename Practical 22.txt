@@ -1,0 +1,23 @@
+// i. Names with price between 250-450
+db.orderinfo.find(
+    { price: { $gte: 250, $lte: 450 } },
+    { cust_name: 1, _id: 0 }
+);
+
+// ii. Increment/Decrement price
+db.orderinfo.updateOne(
+    { cust_id: 123 },
+    { $inc: { price: 10 } }
+);
+db.orderinfo.updateOne(
+    { cust_id: 124 },
+    { $inc: { price: -5 } }
+);
+
+// iii. Remove field
+db.orderinfo.updateMany({}, { $unset: { Age: "" } });
+
+// iv. Status A or price 250
+db.orderinfo.find({
+    $or: [{ status: "A" }, { price: 250 }]
+});

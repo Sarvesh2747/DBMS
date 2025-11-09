@@ -1,0 +1,20 @@
+-- i. Duty allocation for e_no 123
+SELECT * FROM Duty_alloc 
+WHERE e_no = 123 AND shift = 1 AND month = 'April' AND year = 2003;
+
+-- ii. Employees with pay >= Sachin's pay
+SELECT e_name FROM Empl 
+WHERE pay_rate >= (SELECT pay_rate FROM Empl WHERE e_name = 'Sachin');
+
+-- iii. Create view for salary statistics
+CREATE VIEW salary_stats AS 
+SELECT post, MIN(pay_rate) as min_sal, MAX(pay_rate) as max_sal, AVG(pay_rate) as avg_sal
+FROM Empl 
+GROUP BY post;
+
+-- iv. Count of managers per shift
+SELECT d.shift, COUNT(DISTINCT d.e_no) as manager_count
+FROM Duty_alloc d
+INNER JOIN Empl e ON d.e_no = e.e_no
+WHERE e.post = 'manager'
+GROUP BY d.shift;

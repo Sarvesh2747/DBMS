@@ -1,0 +1,30 @@
+-- Create table with constraints
+CREATE TABLE emp (
+    Eno INT AUTO_INCREMENT PRIMARY KEY,
+    Ename VARCHAR(50) NOT NULL,
+    Address VARCHAR(100) DEFAULT 'Nashik',
+    Joindate DATE,
+    Salary DECIMAL(10,2)
+);
+
+-- Set auto_increment start value
+ALTER TABLE emp AUTO_INCREMENT = 101;
+
+-- Add Post field
+ALTER TABLE emp ADD COLUMN Post VARCHAR(50);
+
+-- Insert data
+INSERT INTO emp (Ename, Joindate, Salary, Post) VALUES
+('Amit', '2023-01-15', 35000, 'Manager'),
+('Priya', '2023-03-20', 28000, 'Developer'),
+('Raj', '2023-06-10', 32000, 'Analyst');
+
+-- Create index on Ename
+CREATE INDEX idx_ename ON emp(Ename);
+
+-- Create view
+CREATE VIEW emp_view AS 
+SELECT Ename, Salary FROM emp;
+
+-- View the view
+SELECT * FROM emp_view;

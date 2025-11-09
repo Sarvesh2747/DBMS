@@ -1,0 +1,22 @@
+-- i. Modify company location
+UPDATE Company SET city = 'Pune' WHERE cname = 'ABC';
+
+-- ii. Raise for Mbank managers
+UPDATE works 
+SET sal = CASE 
+    WHEN sal > 20000 THEN sal * 1.03
+    ELSE sal * 1.10
+END
+WHERE cname = 'Mbank' AND emp_id IN (
+    SELECT mgr_id FROM Manager
+);
+
+-- iii. Employees in Bosch, Pune
+SELECT w.ename 
+FROM works w 
+INNER JOIN Company c ON w.c_id = c.c_id 
+WHERE c.cname = 'Bosch' AND c.city = 'Pune';
+
+-- iv. Delete SBC employees with salary > 50000
+DELETE FROM works 
+WHERE cname = 'SBC Company' AND sal > 50000;

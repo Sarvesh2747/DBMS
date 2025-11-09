@@ -1,0 +1,33 @@
+CREATE OR REPLACE FUNCTION func_Grade(p_marks IN NUMBER) RETURN VARCHAR2 IS
+    v_class VARCHAR2(30);
+BEGIN
+    IF p_marks >= 990 AND p_marks <= 1500 THEN
+        v_class := 'Distinction';
+    ELSIF p_marks >= 900 AND p_marks <= 989 THEN
+        v_class := 'First Class';
+    ELSIF p_marks >= 825 AND p_marks <= 899 THEN
+        v_class := 'Higher Second Class';
+    ELSE
+        v_class := 'Not Categorized';
+    END IF;
+    
+    RETURN v_class;
+    
+EXCEPTION
+    WHEN OTHERS THEN
+        RETURN 'Error';
+END;
+/
+
+DECLARE
+    v_name VARCHAR2(50);
+    v_marks NUMBER;
+    v_grade VARCHAR2(30);
+BEGIN
+    SELECT name, totalmarks INTO v_name, v_marks FROM StudMarks WHERE name = 'StudentName';
+    v_grade := func_Grade(v_marks);
+    INSERT INTO Result VALUES(v_name, v_marks, v_grade);
+    COMMIT;
+    DBMS_OUTPUT.PUT_LINE('Grade: ' || v_grade);
+END;
+/

@@ -1,0 +1,20 @@
+// i. Add Age field
+db.orderinfo.updateMany({}, { $set: { Age: 25 } });
+
+// ii. Complex index and drop duplicates
+db.orderinfo.createIndex({ cust_id: 1, status: 1 });
+db.orderinfo.aggregate([
+    { $group: { _id: { cust_id: "$cust_id", status: "$status" }, count: { $sum: 1 } } },
+    { $match: { count: { $gt: 1 } } }
+]);
+
+// iii. Average price by status
+db.orderinfo.aggregate([
+    { $group: { _id: "$status", avg_price: { $avg: "$price" } } }
+]);
+
+// iv. Change name for status B
+db.orderinfo.updateMany(
+    { status: "B" },
+    { $set: { cust_name: "Updated Name" } }
+);

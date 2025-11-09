@@ -1,0 +1,57 @@
+-- Table creation
+CREATE TABLE Employee (
+    e_no INT PRIMARY KEY,
+    e_name VARCHAR(50),
+    city VARCHAR(50),
+    salary DECIMAL(10,2),
+    commission DECIMAL(10,2)
+);
+
+CREATE TABLE Project (
+    p_no INT PRIMARY KEY,
+    p_name VARCHAR(50),
+    city VARCHAR(50)
+);
+
+-- 1. Different locations
+SELECT DISTINCT city FROM Employee;
+
+-- 2. Max and min salary
+SELECT MAX(salary) as max_salary, MIN(salary) as min_salary FROM Employee;
+
+-- 3. Ascending order by salary
+SELECT * FROM Employee ORDER BY salary ASC;
+
+-- 4. Employees from Nasik or Pune
+SELECT e_name FROM Employee WHERE city IN ('Nasik', 'Pune');
+
+-- 5. Employees without commission
+SELECT e_name FROM Employee WHERE commission IS NULL;
+
+-- 6. Change Amit's city
+UPDATE Employee SET city = 'Nashik' WHERE e_name = 'Amit';
+
+-- 7. Names starting with 'A'
+SELECT e_name FROM Employee WHERE e_name LIKE 'A%';
+
+-- 8. Count staff from Mumbai
+SELECT COUNT(*) as mumbai_count FROM Employee WHERE city = 'Mumbai';
+
+-- 9. Count per city
+SELECT city, COUNT(*) as count FROM Employee GROUP BY city;
+
+-- 10. Common cities
+SELECT DISTINCT e.city FROM Employee e 
+INNER JOIN Project p ON e.city = p.city;
+
+-- 11. City-wise minimum salary
+SELECT city, MIN(salary) FROM Employee GROUP BY city;
+
+-- 12. City-wise max salary > 26000
+SELECT city, MAX(salary) as max_salary 
+FROM Employee 
+GROUP BY city 
+HAVING MAX(salary) > 26000;
+
+-- 13. Delete salary > 30000
+DELETE FROM Employee WHERE salary > 30000;

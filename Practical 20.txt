@@ -1,0 +1,69 @@
+// INDEXING
+
+// 1-2. Create collection and insert
+db.indexDemo.insertMany([
+    { name: "John", age: 25, city: "Pune" },
+    { name: "Jane", age: 30, city: "Mumbai" }
+]);
+
+// 3. Single index
+db.indexDemo.createIndex({ name: 1 });
+
+// 4. Compound index
+db.indexDemo.createIndex({ name: 1, age: -1 });
+
+// 5. Unique index
+db.indexDemo.createIndex({ email: 1 }, { unique: true });
+
+// 6. Show indexes
+db.indexDemo.getIndexes();
+
+// 7. Remove index
+db.indexDemo.dropIndex({ name: 1 });
+
+// AGGREGATION
+db.Student.insertMany([
+    { Rollno: 1, name: 'Navin', subject: 'DMSA', marks: 78 },
+    { Rollno: 2, name: 'anusha', subject: 'OSD', marks: 75 },
+    { Rollno: 3, name: 'ravi', subject: 'TOC', marks: 69 },
+    { Rollno: 4, name: 'veena', subject: 'TOC', marks: 70 },
+    { Rollno: 5, name: 'Pravini', subject: 'OSD', marks: 80 },
+    { Rollno: 6, name: 'Reena', subject: 'DMSA', marks: 50 },
+    { Rollno: 7, name: 'Geeta', subject: 'CN', marks: 90 },
+    { Rollno: 8, name: 'Akash', subject: 'CN', marks: 85 }
+]);
+
+// 1. Max marks per subject
+db.Student.aggregate([
+    { $group: { _id: "$subject", maxMarks: { $max: "$marks" } } }
+]);
+
+// 2. Min marks per subject
+db.Student.aggregate([
+    { $group: { _id: "$subject", minMarks: { $min: "$marks" } } }
+]);
+
+// 3. Sum of marks per subject
+db.Student.aggregate([
+    { $group: { _id: "$subject", totalMarks: { $sum: "$marks" } } }
+]);
+
+// 4. Average marks per subject
+db.Student.aggregate([
+    { $group: { _id: "$subject", avgMarks: { $avg: "$marks" } } }
+]);
+
+// 5. First record per subject
+db.Student.aggregate([
+    { $group: { _id: "$subject", first: { $first: "$$ROOT" } } }
+]);
+
+// 6. Last record per subject
+db.Student.aggregate([
+    { $group: { _id: "$subject", last: { $last: "$$ROOT" } } }
+]);
+
+// 7-8. Count per subject
+db.Student.aggregate([
+    { $group: { _id: "$subject", count: { $sum: 1 } } }
+]);
