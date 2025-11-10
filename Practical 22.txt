@@ -1,23 +1,230 @@
-// i. Names with price between 250-450
-db.orderinfo.find(
-    { price: { $gte: 250, $lte: 450 } },
-    { cust_name: 1, _id: 0 }
-);
+// Step 1: Switch to database
+use orderDB
 
-// ii. Increment/Decrement price
+// Step 2: Create collection and insert sample data
+db.orderinfo.insertMany([
+    {
+        cust_id: 123,
+        cust_name: "abc",
+        status: "A",
+        price: 250
+    },
+    {
+        cust_id: 124,
+        cust_name: "xyz",
+        status: "B",
+        price: 300
+    },
+    {
+        cust_id: 125,
+        cust_name: "pqr",
+        status: "A",
+        price: 400
+    },
+    {
+        cust_id: 126,
+        cust_name: "def",
+        status: "C",
+        price: 250
+    },
+    {
+        cust_id: 127,
+        cust_name: "lmn",
+        status: "B",
+        price: 450
+    },
+    {
+        cust_id: 128,
+        cust_name: "rst",
+        status: "A",
+        price: 350
+    },
+    {
+        cust_id: 129,
+        cust_name: "uvw",
+        status: "C",
+        price: 500
+    },
+    {
+        cust_id: 130,
+        cust_name: "ghi",
+        status: "A",
+        price: 280
+    }
+]);
+
+// Verify data insertion
+print("\n========== ORIGINAL DATA ==========");
+db.orderinfo.find().pretty();
+
+// ========================================
+// Query i: Display the name of customers having price between 250 and 450
+// ========================================
+
+print("\n========== CUSTOMERS WITH PRICE BETWEEN 250 AND 450 ==========");
+
+// Method 1: Using $gte and $lte
+db.orderinfo.find(
+    {
+        price: { $gte: 250, $lte: 450 }
+    },
+    {
+        cust_name: 1,
+        price: 1,
+        _id: 0
+    }
+).pretty();
+
+// Method 2: Display with all details
+print("\n========== WITH ALL DETAILS ==========");
+db.orderinfo.find({
+    price: { $gte: 250, $lte: 450 }
+}).pretty();
+
+// ========================================
+// Query ii: Increment price by 10 for cust_id: 123 and decrement by 5 for cust_id: 124
+// ========================================
+
+print("\n========== BEFORE PRICE UPDATE ==========");
+db.orderinfo.find({ $or: [{ cust_id: 123 }, { cust_id: 124 }] }).pretty();
+
+// Increment price by 10 for cust_id: 123
 db.orderinfo.updateOne(
     { cust_id: 123 },
     { $inc: { price: 10 } }
 );
+
+print("\n========== AFTER INCREMENTING PRICE FOR CUST_ID 123 ==========");
+db.orderinfo.find({ cust_id: 123 }).pretty();
+
+// Decrement price by 5 for cust_id: 124
 db.orderinfo.updateOne(
     { cust_id: 124 },
     { $inc: { price: -5 } }
 );
 
-// iii. Remove field
-db.orderinfo.updateMany({}, { $unset: { Age: "" } });
+print("\n========== AFTER DECREMENTING PRICE FOR CUST_ID 124 ==========");
+db.orderinfo.find({ cust_id: 124 }).pretty();
 
-// iv. Status A or price 250
+// Verify both updates together
+print("\n========== BOTH CUSTOMERS AFTER UPDATE ==========");
+db.orderinfo.find({ $or: [{ cust_id: 123 }, { cust_id: 124 }] }).pretty();
+
+// ========================================
+// Query iii: Remove any one field from the orderinfo collection
+// ========================================
+
+print("\n========== BEFORE REMOVING FIELD ==========");
+db.orderinfo.find().pretty();
+
+// Add a temporary field first (to demonstrate removal)
+db.orderinfo.updateMany(
+    {},
+    { $set: { tempField: "temporary" } }
+);
+
+print("\n========== AFTER ADDING TEMP FIELD ==========");
+db.orderinfo.find().pretty();
+
+// Remove the tempField from all documents
+db.orderinfo.updateMany(
+    {},
+    { $unset: { tempField: "" } }
+);
+
+print("\n========== AFTER REMOVING TEMP FIELD ==========");
+db.orderinfo.find().pretty();
+
+// Alternative: Remove the status field from all documents
+// db.orderinfo.updateMany({}, { $unset: { status: "" } });
+
+// Remove status field from a specific document
+db.orderinfo.updateOne(
+    { cust_id: 129 },
+    { $unset: { status: "" } }
+);
+
+print("\n========== AFTER REMOVING STATUS FROM CUST_ID 129 ==========");
+db.orderinfo.find({ cust_id: 129 }).pretty();
+
+// ========================================
+// Query iv: Find customers whose status is A OR price is 250 (or both)
+// ========================================
+
+print("\n========== CUSTOMERS WITH STATUS='A' OR PRICE=250 ==========");
+
+// Using $or operator
 db.orderinfo.find({
+    $or: [
+        { status: "A" },
+        { price: 250 }
+    ]
+}).pretty();
+
+// Display only customer names
+print("\n========== CUSTOMER NAMES ONLY ==========");
+db.orderinfo.find(
+    {
+        $or: [
+            { status: "A" },
+            { price: 250 }
+        ]
+    },
+    {
+        cust_name: 1,
+        status: 1,
+        price: 1,
+        _id: 0
+    }
+).pretty();
+
+// Alternative: Count how many match each condition
+print("\n========== COUNT ANALYSIS ==========");
+print("Total with status A: " + db.orderinfo.count({ status: "A" }));
+print("Total with price 250: " + db.orderinfo.count({ price: 250 }));
+print("Total with status A OR price 250: " + db.orderinfo.count({
     $or: [{ status: "A" }, { price: 250 }]
-});
+}));
+
+// With both conditions (AND)
+print("Total with status A AND price 250: " + db.orderinfo.count({
+    status: "A",
+    price: 250
+}));
+
+// ========================================
+// Additional Verification Queries
+// ========================================
+
+print("\n========== FINAL DATA SUMMARY ==========");
+db.orderinfo.find().pretty();
+
+// Summary statistics
+print("\n========== SUMMARY STATISTICS ==========");
+db.orderinfo.aggregate([
+    {
+        $group: {
+            _id: null,
+            totalDocuments: { $sum: 1 },
+            averagePrice: { $avg: "$price" },
+            minPrice: { $min: "$price" },
+            maxPrice: { $max: "$price" },
+            totalRevenue: { $sum: "$price" }
+        }
+    }
+]).pretty();
+
+// Count by status
+print("\n========== COUNT BY STATUS ==========");
+db.orderinfo.aggregate([
+    {
+        $group: {
+            _id: "$status",
+            count: { $sum: 1 },
+            avgPrice: { $avg: "$price" }
+        }
+    },
+    {
+        $sort: { _id: 1 }
+    }
+]).pretty();
