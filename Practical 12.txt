@@ -1,27 +1,7 @@
-CREATE OR REPLACE TRIGGER trg_Library_After
-AFTER UPDATE OR DELETE ON Library
-FOR EACH ROW
+CREATE OR REPLACE TRIGGER LIB_TRIG 
+AFTER DELETE OR UPDATE OF COPIES,ID,NOB ON LIB 
+REFERENCING OLD AS O NEW AS N 
+FOR EACH ROW 
 BEGIN
-    IF UPDATING THEN
-        INSERT INTO LibraryAudit VALUES(
-            :OLD.BookID, 
-            :OLD.BookName, 
-            :OLD.Author, 
-            :OLD.Publisher, 
-            :OLD.Quantity,
-            SYSDATE,
-            'UPDATE'
-        );
-    ELSIF DELETING THEN
-        INSERT INTO LibraryAudit VALUES(
-            :OLD.BookID, 
-            :OLD.BookName, 
-            :OLD.Author, 
-            :OLD.Publisher, 
-            :OLD.Quantity,
-            SYSDATE,
-            'DELETE'
-        );
-    END IF;
+  INSERT INTO LIB_AUD VALUES(:O.ID,:O.NOB,:O.COPIES);
 END;
-/
