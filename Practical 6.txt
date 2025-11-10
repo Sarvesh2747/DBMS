@@ -1,3 +1,24 @@
+-- Step 1: Create StudMarks Table
+CREATE TABLE StudMarks (
+    name VARCHAR2(50),
+    totalmarks NUMBER
+);
+
+-- Step 2: Create Result Table
+CREATE TABLE Result (
+    name VARCHAR2(50),
+    totalmarks NUMBER,
+    class VARCHAR2(30)
+);
+
+-- Step 3: Insert Sample Data into StudMarks
+INSERT INTO StudMarks VALUES('Amit', 1250);
+INSERT INTO StudMarks VALUES('Priya', 950);
+INSERT INTO StudMarks VALUES('Rahul', 850);
+INSERT INTO StudMarks VALUES('Sneha', 780);
+COMMIT;
+
+-- Step 4: Create Procedure
 CREATE OR REPLACE PROCEDURE proc_Grade(p_name IN VARCHAR2, p_marks IN NUMBER) IS
     v_class VARCHAR2(30);
 BEGIN
@@ -21,14 +42,17 @@ EXCEPTION
 END;
 /
 
-
-For EXECUTION
+-- Step 5: Execute Procedure
+SET SERVEROUTPUT ON;
 
 DECLARE
     v_name VARCHAR2(50);
     v_marks NUMBER;
 BEGIN
-    SELECT name, totalmarks INTO v_name, v_marks FROM StudMarks WHERE name = 'StudentName';
+    SELECT name, totalmarks INTO v_name, v_marks FROM StudMarks WHERE name = 'Amit';
     proc_Grade(v_name, v_marks);
 END;
 /
+
+-- Step 6: View Results
+SELECT * FROM Result;
