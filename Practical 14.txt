@@ -1,3 +1,104 @@
+use collegeDB
+
+// Step 2: Create and insert data into Teachers collection
+db.Teachers.insertMany([
+    {
+        Tname: "Dr. Sharma",
+        dno: 1,
+        Experience: 10,
+        Salary: 45000,
+        Date_of_Joining: new Date("2014-06-15")
+    },
+    {
+        Tname: "Prof. Patel",
+        dno: 2,
+        Experience: 8,
+        Salary: 35000,
+        Date_of_Joining: new Date("2016-08-20")
+    },
+    {
+        Tname: "Dr. Kumar",
+        dno: 2,
+        Experience: 5,
+        Salary: 28000,
+        Date_of_Joining: new Date("2019-01-10")
+    },
+    {
+        Tname: "Prof. Singh",
+        dno: 2,
+        Experience: 12,
+        Salary: 50000,
+        Date_of_Joining: new Date("2012-03-25")
+    },
+    {
+        Tname: "Dr. Mehta",
+        dno: 3,
+        Experience: 6,
+        Salary: 32000,
+        Date_of_Joining: new Date("2018-07-12")
+    }
+])
+
+// Step 3: Create and insert data into Department collection
+db.Department.insertMany([
+    {
+        Dno: 1,
+        Dname: "Computer Engineering"
+    },
+    {
+        Dno: 2,
+        Dname: "Information Technology"
+    },
+    {
+        Dno: 3,
+        Dname: "Electronics Engineering"
+    },
+    {
+        Dno: 4,
+        Dname: "Mechanical Engineering"
+    }
+])
+
+// Step 4: Create and insert data into Students collection
+db.Students.insertMany([
+    {
+        Sname: "Amit",
+        Roll_No: 1,
+        Class: "SE"
+    },
+    {
+        Sname: "Priya",
+        Roll_No: 2,
+        Class: "TE"
+    },
+    {
+        Sname: "Rahul",
+        Roll_No: 3,
+        Class: "BE"
+    },
+    {
+        Sname: "xyz",
+        Roll_No: 4,
+        Class: "SE"
+    },
+    {
+        Sname: "Sneha",
+        Roll_No: 5,
+        Class: "TE"
+    },
+    {
+        Sname: "Rohan",
+        Roll_No: 6,
+        Class: "FE"
+    },
+    {
+        Sname: "Neha",
+        Roll_No: 7,
+        Class: "FE"
+    }
+])
+
+
 1) db.Teachers.insertMany([
     { Tname: "Prof. Sharma", dno: 1, Experience: 10, Salary: 50000, Date_of_Joining: new Date("2015-06-01") },
     { Tname: "Prof. Patel", dno: 2, Experience: 8, Salary: 45000, Date_of_Joining: new Date("2017-08-15") },
@@ -27,5 +128,6 @@ db.Students.insertMany([
 5)db.Students.deleteMany({ Class: "FE" });
 
 6)db.Students.createIndex({ Roll_No: 1 });
+
 
 
