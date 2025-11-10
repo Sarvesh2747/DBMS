@@ -1,12 +1,31 @@
-// Insert sample data
+// Step 1: Switch to database
+use cityDB
+
+// Step 2: Create collection and insert diverse sample data
 db.city.insertMany([
     { city: "pune", type: "urban", state: "MH", population: "5600000" },
     { city: "mumbai", type: "urban", state: "MH", population: "12000000" },
     { city: "nashik", type: "urban", state: "MH", population: "1500000" },
-    { city: "nagpur", type: "urban", state: "MH", population: "2400000" }
+    { city: "nagpur", type: "urban", state: "MH", population: "2400000" },
+    { city: "aurangabad", type: "rural", state: "MH", population: "1200000" },
+    { city: "bangalore", type: "urban", state: "KA", population: "8400000" },
+    { city: "mysore", type: "urban", state: "KA", population: "900000" },
+    { city: "hubli", type: "rural", state: "KA", population: "650000" },
+    { city: "delhi", type: "urban", state: "DL", population: "16800000" },
+    { city: "jaipur", type: "urban", state: "RJ", population: "3100000" },
+    { city: "udaipur", type: "rural", state: "RJ", population: "450000" },
+    { city: "ahmedabad", type: "urban", state: "GJ", population: "5500000" },
+    { city: "surat", type: "urban", state: "GJ", population: "4500000" },
+    { city: "rajkot", type: "rural", state: "GJ", population: "1300000" }
 ]);
 
-// Statewise population
+// Verify data insertion
+db.city.find().pretty();
+
+// ========================================
+// Query 1: Statewise Population using MapReduce
+// ========================================
+
 var mapState = function() {
     emit(this.state, parseInt(this.population));
 };
@@ -15,21 +34,79 @@ var reduceState = function(key, values) {
     return Array.sum(values);
 };
 
-db.city.mapReduce(mapState, reduceState, { out: "statewise_population" });
-db.statewise_population.find();
+// Execute MapReduce for statewise population
+db.city.mapReduce(
+    mapState, 
+    reduceState, 
+    { out: "statewise_population" }
+);
 
-// Citywise population
+// Display statewise population results
+print("\n========== STATEWISE POPULATION ==========");
+db.statewise_population.find().pretty();
+
+// ========================================
+// Query 2: Citywise Population using MapReduce
+// ========================================
+
 var mapCity = function() {
     emit(this.city, parseInt(this.population));
 };
 
-db.city.mapReduce(mapCity, reduceState, { out: "citywise_population" });
-db.citywise_population.find();
+var reduceCity = function(key, values) {
+    return Array.sum(values);
+};
 
-// Typewise population
+// Execute MapReduce for citywise population
+db.city.mapReduce(
+    mapCity, 
+    reduceCity, 
+    { out: "citywise_population" }
+);
+
+// Display citywise population results
+print("\n========== CITYWISE POPULATION ==========");
+db.citywise_population.find().pretty();
+
+// ========================================
+// Query 3: Typewise Population using MapReduce
+// ========================================
+
 var mapType = function() {
     emit(this.type, parseInt(this.population));
 };
 
-db.city.mapReduce(mapType, reduceState, { out: "typewise_population" });
-db.typewise_population.find();
+var reduceType = function(key, values) {
+    return Array.sum(values);
+};
+
+// Execute MapReduce for typewise population
+db.city.mapReduce(
+    mapType, 
+    reduceType, 
+    { out: "typewise_population" }
+);
+
+// Display typewise population results
+print("\n========== TYPEWISE POPULATION ==========");
+db.typewise_population.find().pretty();
+
+// ========================================
+// Additional Queries (Optional)
+// ========================================
+
+// View all output collections
+print("\n========== ALL OUTPUT COLLECTIONS ==========");
+db.getCollectionNames();
+
+// Count documents in each output collection
+print("\nStatewise count: " + db.statewise_population.count());
+print("Citywise count: " + db.citywise_population.count());
+print("Typewise count: " + db.typewise_population.count());
+
+// Sort results by population (descending)
+print("\n========== TOP STATES BY POPULATION ==========");
+db.statewise_population.find().sort({ value: -1 }).pretty();
+
+print("\n========== TOP CITIES BY POPULATION ==========");
+db.citywise_population.find().sort({ value: -1 }).limit(5).pretty();
