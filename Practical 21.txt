@@ -1,20 +1,245 @@
-// i. Add Age field
-db.orderinfo.updateMany({}, { $set: { Age: 25 } });
+// Step 1: Switch to database
+use orderDB
 
-// ii. Complex index and drop duplicates
+// Step 2: Create collection and insert sample data
+db.orderinfo.insertMany([
+    {
+        cust_id: 123,
+        cust_name: "abc",
+        status: "A",
+        price: 250
+    },
+    {
+        cust_id: 124,
+        cust_name: "xyz",
+        status: "A",
+        price: 300
+    },
+    {
+        cust_id: 125,
+        cust_name: "pqr",
+        status: "B",
+        price: 450
+    },
+    {
+        cust_id: 126,
+        cust_name: "def",
+        status: "B",
+        price: 500
+    },
+    {
+        cust_id: 127,
+        cust_name: "lmn",
+        status: "C",
+        price: 350
+    },
+    {
+        cust_id: 128,
+        cust_name: "rst",
+        status: "A",
+        price: 400
+    },
+    {
+        cust_id: 129,
+        cust_name: "uvw",
+        status: "B",
+        price: 600
+    },
+    {
+        cust_id: 130,
+        cust_name: "ghi",
+        status: "C",
+        price: 280
+    }
+]);
+
+// Verify data insertion
+print("\n========== ORIGINAL DATA ==========");
+db.orderinfo.find().pretty();
+
+// ========================================
+// Query i: Add "Age" field to orderinfo collection
+// ========================================
+
+
+
+
+
+// Method 2: Alternative - Add Age field with a default value to all
+// db.orderinfo.updateMany({}, { $set: { Age: 25 } });
+
+// Method 3: Add different ages for different customers
+db.orderinfo.updateOne({ cust_id: 123 }, { $set: { Age: 28 } });
+db.orderinfo.updateOne({ cust_id: 124 }, { $set: { Age: 32 } });
+db.orderinfo.updateOne({ cust_id: 125 }, { $set: { Age: 45 } });
+db.orderinfo.updateOne({ cust_id: 126 }, { $set: { Age: 38 } });
+db.orderinfo.updateOne({ cust_id: 127 }, { $set: { Age: 29 } });
+db.orderinfo.updateOne({ cust_id: 128 }, { $set: { Age: 41 } });
+db.orderinfo.updateOne({ cust_id: 129 }, { $set: { Age: 35 } });
+db.orderinfo.updateOne({ cust_id: 130 }, { $set: { Age: 50 } });
+
+print("\n========== UPDATED AGE VALUES ==========");
+db.orderinfo.find().pretty();
+
+// ========================================
+// Query ii: Create complex (compound) index and handle duplicates
+// ========================================
+
+// Create compound index on status and price
+db.orderinfo.createIndex({ status: 1, price: 1 });
+
+// Create compound index on cust_id and status
 db.orderinfo.createIndex({ cust_id: 1, status: 1 });
+
+// Create unique index on cust_id (to prevent duplicates)
+db.orderinfo.createIndex({ cust_id: 1 }, { unique: true });
+
+// View all indexes
+print("\n========== ALL INDEXES ==========");
+db.orderinfo.getIndexes();
+
+// Find duplicates by cust_id (if any exist)
+print("\n========== FINDING DUPLICATES ==========");
 db.orderinfo.aggregate([
-    { $group: { _id: { cust_id: "$cust_id", status: "$status" }, count: { $sum: 1 } } },
-    { $match: { count: { $gt: 1 } } }
+    {
+        $group: {
+            _id: "$cust_id",
+            count: { $sum: 1 },
+            docs: { $push: "$$ROOT" }
+        }
+    },
+    {
+        $match: { count: { $gt: 1 } }
+    }
 ]);
 
-// iii. Average price by status
-db.orderinfo.aggregate([
-    { $group: { _id: "$status", avg_price: { $avg: "$price" } } }
+// Remove duplicates if found (keep first occurrence)
+// This would be executed only if duplicates exist
+var duplicates = db.orderinfo.aggregate([
+    {
+        $group: {
+            _id: "$cust_id",
+            dups: { $push: "$_id" },
+            count: { $sum: 1 }
+        }
+    },
+    {
+        $match: { count: { $gt: 1 } }
+    }
 ]);
 
-// iv. Change name for status B
+duplicates.forEach(function(doc) {
+    doc.dups.shift(); // Keep the first document
+    db.orderinfo.deleteMany({ _id: { $in: doc.dups } });
+});
+
+print("\n========== AFTER REMOVING DUPLICATES ==========");
+db.orderinfo.find().pretty();
+
+// Query using compound index
+print("\n========== QUERY USING COMPOUND INDEX ==========");
+db.orderinfo.find({ status: "A", price: { $gte: 250 } }).explain("executionStats");
+
+// ========================================
+// Query iii: Display average price for each customer grouped by status
+// ========================================
+
+print("\n========== AVERAGE PRICE BY STATUS ==========");
+db.orderinfo.aggregate([
+    {
+        $group: {
+            _id: "$status",
+            averagePrice: { $avg: "$price" },
+            totalCustomers: { $sum: 1 },
+            totalPrice: { $sum: "$price" }
+        }
+    },
+    {
+        $sort: { _id: 1 }
+    }
+]).pretty();
+
+// Alternative: Average price with customer details
+print("\n========== DETAILED AVERAGE PRICE BY STATUS ==========");
+db.orderinfo.aggregate([
+    {
+        $group: {
+            _id: "$status",
+            averagePrice: { $avg: "$price" },
+            minPrice: { $min: "$price" },
+            maxPrice: { $max: "$price" },
+            customers: { $push: "$cust_name" }
+        }
+    },
+    {
+        $sort: { averagePrice: -1 }
+    }
+]).pretty();
+
+// ========================================
+// Query iv: Change customer's name whose status is "B"
+// ========================================
+
+print("\n========== BEFORE UPDATING STATUS B CUSTOMERS ==========");
+db.orderinfo.find({ status: "B" }).pretty();
+
+// Update all customers with status "B"
 db.orderinfo.updateMany(
     { status: "B" },
-    { $set: { cust_name: "Updated Name" } }
+    { $set: { cust_name: "Updated_Customer_B" } }
 );
+
+print("\n========== AFTER UPDATING STATUS B CUSTOMERS ==========");
+db.orderinfo.find({ status: "B" }).pretty();
+
+// Alternative: Update each status "B" customer with different names
+db.orderinfo.updateOne(
+    { cust_id: 125, status: "B" },
+    { $set: { cust_name: "NewName_PQR" } }
+);
+
+db.orderinfo.updateOne(
+    { cust_id: 126, status: "B" },
+    { $set: { cust_name: "NewName_DEF" } }
+);
+
+db.orderinfo.updateOne(
+    { cust_id: 129, status: "B" },
+    { $set: { cust_name: "NewName_UVW" } }
+);
+
+print("\n========== FINAL DATA WITH INDIVIDUAL UPDATES ==========");
+db.orderinfo.find().pretty();
+
+// ========================================
+// Additional Verification Queries
+// ========================================
+
+// Count documents by status
+print("\n========== COUNT BY STATUS ==========");
+db.orderinfo.aggregate([
+    {
+        $group: {
+            _id: "$status",
+            count: { $sum: 1 }
+        }
+    }
+]);
+
+// Show all unique statuses
+print("\n========== UNIQUE STATUSES ==========");
+db.orderinfo.distinct("status");
+
+// Summary statistics
+print("\n========== SUMMARY STATISTICS ==========");
+db.orderinfo.aggregate([
+    {
+        $group: {
+            _id: null,
+            totalDocuments: { $sum: 1 },
+            averagePrice: { $avg: "$price" },
+            averageAge: { $avg: "$Age" },
+            totalRevenue: { $sum: "$price" }
+        }
+    }
+]);
